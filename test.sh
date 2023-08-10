@@ -7,9 +7,9 @@ for file in $(find . -name "*.tf"); do
   block=$(sed -n "${start},${end}p" $file | sed -n '/tags {/,/}/p')
 
   while read -r line; do
-    if [[ $line == *=* ]] && [[ $line != *"tags"* ]]; then
-      key=$(echo $line | awk -F'=' '{gsub(/^[ \t"]+|[ \t",]+$/, "", $1); print $1}')
-      value=$(echo $line | awk -F'=' '{gsub(/^[ \t"]+|[ \t",]+$/, "", $2); print $2}')
+    key=$(echo $line | awk -F'=' '{gsub(/^[ \t"]+|[ \t",]+$/, "", $1); print $1}')
+    value=$(echo $line | awk -F'=' '{gsub(/^[ \t"]+|[ \t",]+$/, "", $2); print $2}')
+    if [[ -n $key && -n $value ]]; then
       json=$(echo $json | jq --arg key "$key" --arg value "$value" '. + {($key): $value}')
     fi
   done <<< "$block"
@@ -18,3 +18,4 @@ done
 echo $json
 export YOR_SIMPLE_TAGS=$json
 yor tag --tag-groups simple --directory .
+fi
